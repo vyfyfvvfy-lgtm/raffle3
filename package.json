@@ -5,7 +5,8 @@
   "description": "Telegram monitor for raffles.upgrader.best",
   "main": "monitor.js",
   "scripts": {
-    "start": "node monitor.js"
+    "start": "node monitor.js",
+    "postinstall": "playwright install chromium"
   },
   "dependencies": {
     "dotenv": "^16.4.7",
