@@ -251,14 +251,6 @@ async function inspectPage(url) {
     await page.close();
   }
 }
-    return {
-      status: detectStatus(rawText),
-      details: extractDetails(rawText, url)
-    };
-  } finally {
-    await page.close();
-  }
-}
 async function checkOne(chatId, user, url) {
   try {
     const result = await inspectPage(url);
