@@ -155,37 +155,7 @@ function normalizeText(text) {
 function detectStatus(rawText) {
   const text = normalizeText(rawText);
 
-  // Английский: Live giveaways 0
-  const liveGiveaways = text.match(
-    /live giveaways\s*:?\s*(\d+)/
-  );
-
-  if (liveGiveaways) {
-    return Number(liveGiveaways[1]) > 0
-      ? "active"
-      : "inactive";
-  }
-
-  // Английский: 0 LIVE NOW
-  const liveNow = text.match(
-    /(\d+)\s*live now/
-  );
-
-  if (liveNow) {
-    return Number(liveNow[1]) > 0
-      ? "active"
-      : "inactive";
-  }
-
-  // Английские сообщения об отсутствии розыгрышей
-  if (
-    /no live giveaways right now/.test(text) ||
-    /no active giveaways/.test(text)
-  ) {
-    return "inactive";
-  }
-
-  // Русские варианты
+  // Проверяем количество активных розыгрышей
   const activeSection = text.match(
     /активные розыгрыши\s*:?\s*(\d+)/
   );
@@ -196,6 +166,7 @@ function detectStatus(rawText) {
       : "inactive";
   }
 
+  // Проверяем счётчик розыгрышей, идущих сейчас
   const activeCount = text.match(
     /(\d+)\s+идут\s+сейчас/
   );
@@ -206,13 +177,33 @@ function detectStatus(rawText) {
       : "inactive";
   }
 
-  if (
-    /сейчас нет активных розыгрышей|победитель уже выбран|розыгрыш завершен|розыгрыш окончен|завершенные розыгрыши/.test(text)
-  ) {
+  if (/сейчас нет активных розыгрышей/.test(text)) {
+    return "inactive";
+  }
+
+  if (/победитель уже выбран|розыгрыш завершен|розыгрыш окончен|завершенные розыгрыши/.test(text)) {
     return "inactive";
   }
 
   return "unknown";
+}
+
+function extractDetails(rawText, url) {
+  const lines = rawText
+    .split("\n")
+    .map(line => line.trim())
+    .filter(Boolean);
+
+  const title = lines.find(line =>
+    line.length >= 4 &&
+    line.length <= 90 &&
+    !/участвовать|поделиться|как это работает|идет сейчас|организатор/i.test(line)
+  );
+
+  return {
+    title: title || "Активный розыгрыш",
+    url
+  };
 }
 
 
