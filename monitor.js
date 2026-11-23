@@ -151,20 +151,35 @@ function normalizeText(text) {
     .trim();
 }
 
+
 function detectStatus(rawText) {
   const text = normalizeText(rawText);
+
+  // Проверяем количество активных розыгрышей
+  const activeSection = text.match(
+    /активные розыгрыши\s*:?\s*(\d+)/
+  );
+
+  if (activeSection) {
+    return Number(activeSection[1]) > 0
+      ? "active"
+      : "inactive";
+  }
+
+  // Проверяем счётчик розыгрышей, идущих сейчас
+  const activeCount = text.match(
+    /(\d+)\s+идут\s+сейчас/
+  );
+
+  if (activeCount) {
+    return Number(activeCount[1]) > 0
+      ? "active"
+      : "inactive";
+  }
 
   if (/сейчас нет активных розыгрышей/.test(text)) {
     return "inactive";
   }
-
-  const activeCount = text.match(/(\d+)\s+идут\s+сейчас/);
-
-  if (activeCount) {
-    return Number(activeCount[1]) > 0 ? "active" : "inactive";
-  }
-
-  if (/\bидет сейчас\b/.test(text)) return "active";
 
   if (/победитель уже выбран|розыгрыш завершен|розыгрыш окончен|завершенные розыгрыши/.test(text)) {
     return "inactive";
