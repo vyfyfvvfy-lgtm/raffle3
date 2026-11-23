@@ -206,9 +206,11 @@ function extractDetails(rawText, url) {
   };
 }
 
+
 async function inspectPage(url) {
   const page = await browser.newPage({
-    userAgent: "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 Chrome/120 Safari/537.36"
+    userAgent:
+      "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 Chrome/120 Safari/537.36"
   });
 
   try {
@@ -223,12 +225,32 @@ async function inspectPage(url) {
       );
     }
 
-    await page.waitForTimeout(1800);
+    // Даём странице время загрузить данные
+    await page.waitForTimeout(6000);
 
     const rawText = await page.locator("body").innerText({
-      timeout: 10000
+      timeout: 15000
     });
 
+    console.log("\n========== DEBUG UPGRADER ==========");
+    console.log("URL:", url);
+    console.log("Заголовок:", await page.title());
+    console.log("Текст страницы:");
+    console.log(rawText.slice(0, 8000));
+    console.log("====================================\n");
+
+    const status = detectStatus(rawText);
+
+    console.log("Результат определения:", status);
+
+    return {
+      status,
+      details: extractDetails(rawText, url)
+    };
+  } finally {
+    await page.close();
+  }
+}
     return {
       status: detectStatus(rawText),
       details: extractDetails(rawText, url)
